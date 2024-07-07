@@ -4,7 +4,10 @@ const puppeteer = require('puppeteer');
 const inintializeScraper = async (res) => {
     let browser; 
     try {
-        browser = await puppeteer.launch();
+        browser = await puppeteer.launch({
+            executablePath: process.env.NODE_ENV === "production" ? 
+            process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+        });
         const page = await browser.newPage();
         const url = 'https://feuerwehr.ottenschlag.com/';
         await page.goto(url);
