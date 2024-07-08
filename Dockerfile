@@ -5,9 +5,18 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 
 WORKDIR /usr/scr/app
 
+# Copy package.json and package-lock.json
 COPY package*.json ./
+
+# Install dependencies including TypeScript
 RUN npm ci
 
+# Copy the rest of the application
 COPY . .
+
+# Compile TypeScript to JavaScript
+RUN npm run build
+
+# Start command
 CMD ["npm", "start"]
 
