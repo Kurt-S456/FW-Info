@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Express, Request, Response } from "express";
 import { initializeScraper } from './scraper';
 
-const app = express();
+const app: Express = express();
 const PORT: string | number = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
