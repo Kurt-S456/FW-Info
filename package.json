@@ -15,9 +15,11 @@
   "description": "",
   "dependencies": {
     "@libsql/client": "^0.7.0",
+    "@types/node-cron": "^3.0.11",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.31.2",
     "express": "^4.19.2",
+    "node-cron": "^3.0.3",
     "postgres": "^3.4.4",
     "puppeteer": "^22.12.1"
   },
