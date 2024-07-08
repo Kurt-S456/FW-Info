@@ -1,5 +1,5 @@
 import express, { Express, Request, Response } from "express";
-import { initializeScraper } from './scraper';
+import { initializeScraper } from '../service/scraper';
 
 const app: Express = express();
 const PORT: string | number = process.env.PORT || 4000;

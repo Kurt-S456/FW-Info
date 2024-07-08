@@ -5,7 +5,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 
 WORKDIR /usr/scr/app
 
-# Copy package.json and package-lock.json
+ # Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies including TypeScript
