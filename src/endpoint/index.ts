@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from "express";
 import { initializeScraper } from '../service/scraper';
+import * as dbQueries from '../db/queries';
 
 const app: Express = express();
 const PORT: string | number = process.env.PORT || 4000;
@@ -14,4 +15,9 @@ app.get('/', (req: express.Request, res: express.Response) => {
 
 app.get('/scrape', async (req: express.Request, res: express.Response) => {
     await initializeScraper(res);
+});
+
+app.get('/articles', async (req: express.Request, res: express.Response) => {
+    console.log("GET /articles");
+    res.send(await dbQueries.getArticles());
 });
