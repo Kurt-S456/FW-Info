@@ -2,6 +2,7 @@ import express, { Express } from "express";
 import * as scraper from '../service/scraper';
 import * as dbQueries from '../db/queries';
 import * as cron from 'node-cron';
+import { scrapeFFOttenschalg } from '../service/scrapeAFKOttenschalg';
 
 const app: Express = express();
 const PORT: string | number = process.env.PORT ?? 4000;
@@ -23,11 +24,7 @@ app.get('/articles', async (req: express.Request, res: express.Response) => {
 cron.schedule('* * * * *', async () => {
     console.log("Cron job started");
     const browser = await scraper.initBrowser();
-    const page = await browser.newPage();
-    dbQueries.getDepartments().then(async (departments) => {
-    for (const department of departments) {
-        page.goto(department.url);
-        console.log(`Scraping ${department.name}`);
-    }});
+    await scrapeFFOttenschalg(browser, 'https://feuerwehr.ottenschlag.com/-/index.htm', 1);
+    await browser.close();
     console.log("Cron job finished");
 });
