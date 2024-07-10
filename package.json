@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node dist/endpoint/index.js",
+    "start": "npm run build && node dist/endpoint/index.js",
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate"
   },

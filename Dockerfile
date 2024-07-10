@@ -14,9 +14,6 @@ RUN npm ci
 # Copy the rest of the application
 COPY . .
 
-# Compile TypeScript to JavaScript
-RUN npm run build
-
 # Start command
 CMD ["npm", "start"]
 
