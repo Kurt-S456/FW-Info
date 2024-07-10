@@ -23,6 +23,11 @@ app.get('/articles', async (req: express.Request, res: express.Response) => {
 cron.schedule('* * * * *', async () => {
     console.log("Cron job started");
     const browser = await scraper.initBrowser();
-    
+    const page = await browser.newPage();
+    dbQueries.getDepartments().then(async (departments) => {
+    for (const department of departments) {
+        page.goto(department.url);
+        console.log(`Scraping ${department.name}`);
+    }});
     console.log("Cron job finished");
 });
