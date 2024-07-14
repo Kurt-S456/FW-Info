@@ -24,7 +24,7 @@ app.get('/articles', async (req: express.Request, res: express.Response) => {
 cron.schedule('* * * * *', async () => {
     console.log("Cron job started");
     const browser = await scraper.initBrowser();
-    await scrapeFFOttenschalg(browser, 'https://feuerwehr.ottenschlag.com/-/index.htm', 1);
+    await scrapeFFOttenschalg(browser, 1);
     await browser.close();
     console.log("Cron job finished");
 });

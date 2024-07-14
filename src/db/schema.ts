@@ -1,16 +1,17 @@
 import { sql } from 'drizzle-orm';
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-export const articleTable = sqliteTable("article", {
+export const districtTable = sqliteTable("district", {
   id: integer("id").primaryKey(),
-  title: text("title").notNull(),
-  summary: text("summary").notNull(),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+});
+
+export const sectionTable = sqliteTable("section", {
+  id: integer("id").primaryKey(),
+  name: text("name"),
   url: text("url"),
-  imageUrl: text("image_url"),
-  departmentId: integer("department_id").notNull().references(() => departmentTable.id),
-  createdAt: text('created_at')
-  .default(sql`(CURRENT_TIMESTAMP)`)
-  .notNull(),
+  districtId: integer("district_id").notNull().references(() => districtTable.id),
 });
 
 export const departmentTable = sqliteTable("department", {
@@ -20,17 +21,16 @@ export const departmentTable = sqliteTable("department", {
   sectionId: integer("section_id").notNull().references(() => sectionTable.id),
 });
 
-export const sectionTable = sqliteTable("section", {
+export const articleTable = sqliteTable("article", {
   id: integer("id").primaryKey(),
-  name: text("name"),
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
   url: text("url"),
-  districtId: integer("district_id").notNull().references(() => distirctTable.id),
-});
-
-export const distirctTable = sqliteTable("district", {
-  id: integer("id").primaryKey(),
-  name: text("name").notNull(),
-  url: text("url").notNull(),
+  imageUrl: text("image_url"),
+  departmentId: integer("department_id").notNull().references(() => departmentTable.id),
+  createdAt: text('created_at')
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull(),
 });
 
 export type InsertArticle = typeof articleTable.$inferInsert;
@@ -40,4 +40,4 @@ export type SelectDepartment = typeof departmentTable.$inferSelect;
 
 export type SelectSection = typeof sectionTable.$inferSelect;
 
-export type SelectDistrict = typeof distirctTable.$inferSelect;
+export type SelectDistrict = typeof districtTable.$inferSelect;
