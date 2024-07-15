@@ -8,21 +8,21 @@ export const districtTable = sqliteTable("district", {
 });
 
 export const sectionTable = sqliteTable("section", {
-  id: integer("id").primaryKey(),
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name"),
   url: text("url"),
   districtId: integer("district_id").notNull().references(() => districtTable.id),
 });
 
 export const departmentTable = sqliteTable("department", {
-  id: integer("id").primaryKey(),
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   url: text("url").notNull(),
   sectionId: integer("section_id").notNull().references(() => sectionTable.id),
 });
 
 export const articleTable = sqliteTable("article", {
-  id: integer("id").primaryKey(),
+  id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
   summary: text("summary").notNull(),
   url: text("url"),
@@ -41,3 +41,7 @@ export type SelectDepartment = typeof departmentTable.$inferSelect;
 export type SelectSection = typeof sectionTable.$inferSelect;
 
 export type SelectDistrict = typeof districtTable.$inferSelect;
+
+export function generateId(): number {
+  return Math.floor(Math.random() * 1000000);
+}

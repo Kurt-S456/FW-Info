@@ -1,6 +1,6 @@
 import * as puppeteer from 'puppeteer';
 import { InsertArticle } from '../db/schema';
-import { createArticle } from '../db/queries';
+import { createArticles } from '../db/queries';
 
 
 export async function scrapeFFOttenschalg(browser: puppeteer.Browser, departmentId: number) {
@@ -59,6 +59,6 @@ export async function scrapeFFOttenschalg(browser: puppeteer.Browser, department
         return results;
       }, departmentId);
       console.log(articles);
-      await createArticle(articles[0]);
+      createArticles(articles);
     await page.close();
 }

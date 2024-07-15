@@ -3,6 +3,7 @@ import * as scraper from '../service/scraper';
 import * as dbQueries from '../db/queries';
 import * as cron from 'node-cron';
 import { scrapeFFOttenschalg } from '../service/scrapeAFKOttenschalg';
+import { InsertArticle } from "../db/schema";
 
 const app: Express = express();
 const PORT: string | number = process.env.PORT ?? 4000;
