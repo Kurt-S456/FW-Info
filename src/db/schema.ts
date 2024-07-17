@@ -26,13 +26,18 @@ export const articleTable = sqliteTable("article", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
   summary: text("summary").notNull(),
-  content: text("content"),
   url: text("url"),
   imageUrl: text("image_url"),
   departmentId: integer("department_id").notNull().references(() => departmentTable.id),
   createdAt: text('created_at')
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
+});
+
+export const paragraphTable = sqliteTable("paragraph", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  content: text("content").notNull(),
+  articleId: integer("article_id").notNull().references(() => articleTable.id),
 });
 
 export const tagTable = sqliteTable("tag", {
