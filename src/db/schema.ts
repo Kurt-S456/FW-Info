@@ -8,18 +8,11 @@ export const districtTable = sqliteTable("district", {
   url: text("url").notNull(),
 });
 
-export const sectionTable = sqliteTable("section", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name"),
-  url: text("url"),
-  districtId: integer("district_id").notNull().references(() => districtTable.id),
-});
-
 export const departmentTable = sqliteTable("department", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   url: text("url").notNull(),
-  sectionId: integer("section_id").notNull().references(() => sectionTable.id),
+  districtId: integer("district_id").notNull().references(() => districtTable.id),
 });
 
 export const articleTable = sqliteTable("article", {
@@ -32,12 +25,6 @@ export const articleTable = sqliteTable("article", {
   createdAt: text('created_at')
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
-});
-
-export const paragraphTable = sqliteTable("paragraph", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  content: text("content").notNull(),
-  articleId: integer("article_id").notNull().references(() => articleTable.id),
 });
 
 export const tagTable = sqliteTable("tag", {
@@ -56,7 +43,5 @@ export type InsertArticle = typeof articleTable.$inferInsert;
 export type SelectArticle = typeof articleTable.$inferSelect;
 
 export type SelectDepartment = typeof departmentTable.$inferSelect;
-
-export type SelectSection = typeof sectionTable.$inferSelect;
 
 export type SelectDistrict = typeof districtTable.$inferSelect;
