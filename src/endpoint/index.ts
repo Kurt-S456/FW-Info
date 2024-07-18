@@ -2,7 +2,7 @@ import express, { Express } from "express";
 import * as scraper from '../service/scraper';
 import * as dbQueries from '../db/queries';
 import * as cron from 'node-cron';
-import { scrapeFFOttenschalg } from '../service/scrapeAFKOttenschalg';
+import { scrapeFFOttenschalgArticles, scrapeFFOttenschalgParagraphs } from '../service/scrapeAFKOttenschalg';
 import { InsertArticle } from "../db/schema";
 
 const app: Express = express();
@@ -25,7 +25,9 @@ app.get('/articles', async (req: express.Request, res: express.Response) => {
 cron.schedule('* * * * *', async () => {
     console.log("Cron job started");
     const browser = await scraper.initBrowser();
-    await scrapeFFOttenschalg(browser, 1);
+    const articles: Array<InsertArticle> = await scrapeFFOttenschalgArticles(browser, 1);
+    console.log(`Scraped ${articles.length} articles`);
+    await dbQueries.createArticles(articles);
     await browser.close();
     console.log("Cron job finished");
 });

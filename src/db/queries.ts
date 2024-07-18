@@ -17,7 +17,6 @@ export async function getDepartments() : Promise<Array<SelectDepartment>> {
 
 export async function articleExists(title: string) {
     const result = await db.select({ count: sql<number>`count(*)` }).from(articleTable).where(eq(articleTable.title, title));
-    console.log(result);
     return result[0].count > 0;
 }
 
