@@ -8,11 +8,19 @@ export const districtTable = sqliteTable("district", {
   url: text("url").notNull(),
 });
 
-export const departmentTable = sqliteTable("department", {
+export const sectionTable = sqliteTable("section", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   url: text("url").notNull(),
   districtId: integer("district_id").notNull().references(() => districtTable.id),
+
+});
+
+export const departmentTable = sqliteTable("department", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  districtId: integer("district_id").notNull().references(() => sectionTable.id),
 });
 
 export const articleTable = sqliteTable("article", {
@@ -21,7 +29,9 @@ export const articleTable = sqliteTable("article", {
   summary: text("summary").notNull(),
   url: text("url"),
   imageUrl: text("image_url"),
-  departmentId: integer("department_id").notNull().references(() => departmentTable.id),
+  departmentId: integer("department_id").references(() => departmentTable.id),
+  sectionId: integer("section_id").references(() => sectionTable.id),
+  districtId: integer("district_id").references(() => districtTable.id),
   createdAt: text('created_at')
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),

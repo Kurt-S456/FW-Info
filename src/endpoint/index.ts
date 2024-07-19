@@ -1,8 +1,8 @@
 import express, { Express } from "express";
-import * as scraper from '../service/scraper';
+import * as scraper from '../service/scraper/index';
+import * as afkScraper from '../service/scraper/afk';
 import * as dbQueries from '../db/queries';
 import * as cron from 'node-cron';
-import { InsertArticle } from "../db/schema";
 
 const app: Express = express();
 const PORT: string | number = process.env.PORT ?? 4000;
@@ -24,12 +24,16 @@ app.get('/articles', async (req: express.Request, res: express.Response) => {
 cron.schedule('* * * * *', async () => {
     console.log("Cron job started");
     const browser = await scraper.initBrowser();
-    const afkott = await scraper.scrapeArticlesOttenschlag(browser, 1);
+    const afkott = await afkScraper.scrapeArticlesOttenschlag(browser, 2);
     console.log(afkott);
-    await dbQueries.createArticles(afkott);
-    const afkgg = await scraper.scrapeArticlesGrossGerungs(browser, 2);
+    const afkgg = await afkScraper.scrapeArticlesGrossGerungs(browser, 1);
     console.log(afkgg);
-    await dbQueries.createArticles(afkgg);
+    try {
+        await dbQueries.createArticles(afkott);
+        await dbQueries.createArticles(afkgg);
+    } catch (error) {
+        console.error(error);
+    }
     await browser.close();
     console.log("Cron job finished");
 });
