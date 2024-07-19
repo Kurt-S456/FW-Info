@@ -1,6 +1,7 @@
 import express, { Express } from "express";
 import * as scraper from '../service/scraper/index';
 import * as afkScraper from '../service/scraper/afk';
+import * as bfkScraper from '../service/scraper/bfk';
 import * as dbQueries from '../db/queries';
 import * as cron from 'node-cron';
 
@@ -24,16 +25,9 @@ app.get('/articles', async (req: express.Request, res: express.Response) => {
 cron.schedule('* * * * *', async () => {
     console.log("Cron job started");
     const browser = await scraper.initBrowser();
-    const afkott = await afkScraper.scrapeArticlesOttenschlag(browser, 2);
-    console.log(afkott);
-    const afkgg = await afkScraper.scrapeArticlesGrossGerungs(browser, 1);
-    console.log(afkgg);
-    try {
-        await dbQueries.createArticles(afkott);
-        await dbQueries.createArticles(afkgg);
-    } catch (error) {
-        console.error(error);
-    }
+    const bfkGd = await bfkScraper.scrapeArticlesGmuend(browser, 1);
+    console.log("bfkGd", bfkGd);
+    await dbQueries.createArticles(bfkGd);
     await browser.close();
     console.log("Cron job finished");
 });
