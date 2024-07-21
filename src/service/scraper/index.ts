@@ -2,6 +2,7 @@ import * as puppeteer from 'puppeteer';
 import 'dotenv/config';
 
 export async function initBrowser() : Promise<puppeteer.Browser> {
+    try {
         return await puppeteer.launch({
             args: [
                 '--no-sandbox', 
@@ -14,4 +15,8 @@ export async function initBrowser() : Promise<puppeteer.Browser> {
             ? process.env.PUPPETEER_EXECUTABLE_PATH ?? puppeteer.executablePath()
             : puppeteer.executablePath(),
         });
+    } catch (error) {
+        console.error('Could not create browser instance: '+error);
+        return {} as puppeteer.Browser;
+    };
 };
