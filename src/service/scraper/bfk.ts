@@ -75,3 +75,79 @@ export async function scrapeArticlesGmuend(browser: puppeteer.Browser, districtI
 
     return articles;
 }
+
+
+export async function scrapeArticlesWeidhofen(browser: puppeteer.Browser, districtId: number): Promise<InsertArticle[]> {
+    const url: string = 'https://www.bfk-waidhofen.at/category/berichte/2024/';
+    console.log(`Scraping from ${url}`);
+    const page = await browser.newPage();
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const articles = await page.evaluate((districtId, baseUrl) => {
+        const articleElements = document.querySelectorAll('.post');
+        return Array.from(articleElements).map(article => {
+            const titleElement = article.querySelector('.entry-title a');
+            const summaryElement = article.querySelector('.entry-summary p');
+            const imageUrlElement = article.querySelector('.post-thumbnail a img');
+            let url = titleElement?.getAttribute('href') || '';
+            if (!url.startsWith('http')) {
+                url = baseUrl + url;
+            }
+
+            return {
+                districtId: districtId,
+                title: titleElement?.textContent?.trim() || '',
+                summary: summaryElement?.textContent?.trim() || '',
+                imageUrl: imageUrlElement?.getAttribute('src') || '',
+                url: url,
+            } as InsertArticle;
+        });
+    }, districtId, url);
+
+    await page.close();
+    return await removePersistedArticles(articles, districtId);
+
+}
+
+export async function scrapeDeploymentReportsWeidhofen(browser: puppeteer.Browser, districtId: number): Promise<InsertArticle[]> {
+    const url: string = 'https://www.bfk-waidhofen.at/category/einsaetze/2024-einsaetze/';
+    console.log(`Scraping from ${url}`);
+    const page = await browser.newPage();
+    await page.goto(url);
+    const articles = await page.evaluate((districtId, baseUrl) => {
+        const articleElements = document.querySelectorAll('.post');
+        return Array.from(articleElements).map(article => {
+            const titleElement = article.querySelector('.entry-title a');
+            const summaryElement = article.querySelector('.entry-summary p');
+            const imageUrlElement = article.querySelector('.post-thumbnail a img');
+            let url = titleElement?.getAttribute('href') || '';
+            if (!url.startsWith('http')) {
+                url = baseUrl + url;
+            }
+
+            return {
+                districtId: districtId,
+                title: titleElement?.textContent?.trim() || '',
+                summary: summaryElement?.textContent?.trim() || '',
+                imageUrl: imageUrlElement?.getAttribute('src') || '',
+                url: url,
+            } as InsertArticle;
+        });
+    }, districtId, url);
+
+    await page.close();
+    return await removePersistedArticles(articles, districtId);
+
+}
+
+async function removePersistedArticles(articles: InsertArticle[], id: number): Promise<InsertArticle[]> {
+    const articleExistencePromises = articles.map(article =>
+        dbQueries.articleExists(article.title, id).then(exists => ({ article, exists }))
+    );
+
+    const articlesAndExistence = await Promise.all(articleExistencePromises);
+    const newArticles = articlesAndExistence
+        .filter(({ exists }) => !exists)
+        .map(({ article }) => article);
+
+    return newArticles;
+}

@@ -31,10 +31,17 @@ cron.schedule('* * * * *', async () => {
     console.log(afkgg);
     const bfkGd = await bfkScraper.scrapeArticlesGmuend(browser, 1);
     console.log("bfkGd", bfkGd);
+    const bfkWtArt = await bfkScraper.scrapeArticlesWeidhofen(browser, 3);
+    const bfkWtRep = await bfkScraper.scrapeDeploymentReportsWeidhofen(browser, 3);
+    console.log("bfkWtArt", bfkWtArt);
+    console.log("bfkWtRep", bfkWtRep);
+
     try {
         await dbQueries.createArticles(afkott);
         await dbQueries.createArticles(afkgg);
         await dbQueries.createArticles(bfkGd);
+        await dbQueries.createArticles(bfkWtArt);
+        await dbQueries.createArticles(bfkWtRep);
     } catch (error) {
         console.error(error);
     }
