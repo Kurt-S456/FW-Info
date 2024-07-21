@@ -14,12 +14,17 @@ export async function scrapeArticlesOttenschlag(browser: puppeteer.Browser, sect
             const summaryElement = article.querySelector('.info > p:nth-of-type(3)');
             const imageUrlElement = article.querySelector('.Bild img');
             const urlElement = article.querySelector('.link a');
+            let url = urlElement?.getAttribute('href') || '';
+            if (!url.startsWith('http') && !url.startsWith('www')) {
+                url = baseUrl + '-/' + url;
+            }
+
             return {
                 sectionId: sectionId,
                 title: titleElement?.textContent?.trim() || '',
                 summary: summaryElement?.textContent?.trim() || '',
                 imageUrl: baseUrl + imageUrlElement?.getAttribute('src')?.replace('../', '').replace(/ /g, '%20') || '',
-                url: baseUrl + '-/' + urlElement?.getAttribute('href') || '',
+                url: url,
             } as InsertArticle;
         });
     }, sectionId, url.substring(0, url.indexOf('-/48.htm')));
