@@ -17,7 +17,7 @@ async function scrapeArticlesUrlsGmuend(browser: puppeteer.Browser): Promise<str
     });
 }
 
-export async function scrapeArticlesGmuend(browser: puppeteer.Browser, sectionId: number): Promise<InsertArticle[]> {
+export async function scrapeArticlesGmuend(browser: puppeteer.Browser, districtId: number): Promise<InsertArticle[]> {
     const urls: string[] = await scrapeArticlesUrlsGmuend(browser);
     const articles: InsertArticle[] = [];
     const concurrencyLimit = 5;
@@ -32,7 +32,7 @@ export async function scrapeArticlesGmuend(browser: puppeteer.Browser, sectionId
         try {
             const page = await browser.newPage();
             await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 }); // 30s timeout
-            const article = await page.evaluate((sectionId, url) => {
+            const article = await page.evaluate((districtId, url) => {
                 function extractTextUpToSecondParagraph(input: string): string {
                     const lines = input.split('\n');
                     if (lines.length > 2) {
@@ -45,14 +45,14 @@ export async function scrapeArticlesGmuend(browser: puppeteer.Browser, sectionId
                 const summaryElement = document.querySelector('.entry-content > p:nth-child(2)');
                 const imageUrlElement = document.querySelector('.attachment-dynamico-ultra-wide');
                 return {
-                    sectionId: sectionId,
+                    districtId: districtId,
                     title: extractTextUpToSecondParagraph(titleElement?.textContent?.trim() || ''),
                     summary: summaryElement?.textContent?.trim() || '',
                     imageUrl: imageUrlElement?.getAttribute('src') || '',
                     url: url,
                 } as InsertArticle;
-            }, sectionId, url);
-            const articleExists = await dbQueries.articleExists(article.title);
+            }, districtId, url);
+            const articleExists = await dbQueries.articleExists(article.title, districtId);
             if (!articleExists) {
                 articles.push(article);
             }

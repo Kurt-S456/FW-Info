@@ -24,7 +24,7 @@ export async function scrapeArticlesOttenschlag(browser: puppeteer.Browser, sect
         });
     }, sectionId, url.substring(0, url.indexOf('-/48.htm')));
     await page.close();
-    return await removePersistedArticles(articles);
+    return await removePersistedArticles(articles, sectionId);
 }
 
 export async function scrapeArticlesGrossGerungs(browser: puppeteer.Browser, sectionId: number): Promise<InsertArticle[]> {
@@ -55,13 +55,13 @@ export async function scrapeArticlesGrossGerungs(browser: puppeteer.Browser, sec
 
     }, sectionId, url.substring(0, url.indexOf('index.php')));
     await page.close();
-    return await removePersistedArticles(articles);
+    return await removePersistedArticles(articles, sectionId);
 }
 
 
-async function removePersistedArticles(articles: InsertArticle[]): Promise<InsertArticle[]> {
+async function removePersistedArticles(articles: InsertArticle[], id: number): Promise<InsertArticle[]> {
     const articleExistencePromises = articles.map(article =>
-        articleExists(article.title).then(exists => ({ article, exists }))
+        articleExists(article.title, id).then(exists => ({ article, exists }))
     );
 
     const articlesAndExistence = await Promise.all(articleExistencePromises);
