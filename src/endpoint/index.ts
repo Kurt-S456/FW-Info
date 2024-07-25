@@ -4,6 +4,7 @@ import * as afkScraper from '../service/scraper/afk';
 import * as bfkScraper from '../service/scraper/bfk';
 import * as dbQueries from '../db/queries';
 import * as cron from 'node-cron';
+import { InsertArticle } from "../db/schema";
 
 const app: Express = express();
 const PORT: string | number = process.env.PORT ?? 4000;
@@ -25,28 +26,41 @@ app.get('/articles', async (req: express.Request, res: express.Response) => {
 cron.schedule('* * * * *', async () => {
     console.log("Cron job started");
     const browser = await scraper.initBrowser();
-    const afkott = await afkScraper.scrapeArticlesOttenschlag(browser, 2);
-    console.log(afkott);
-    const afkgg = await afkScraper.scrapeArticlesGrossGerungs(browser, 1);
-    console.log(afkgg);
-    const bfkGd = await bfkScraper.scrapeArticlesGmuend(browser, 1);
-    console.log("bfkGd", bfkGd);
-    const bfkWtArt = await bfkScraper.scrapeArticlesWeidhofen(browser, 3);
-    const bfkWtRep = await bfkScraper.scrapeDeploymentReportsWeidhofen(browser, 3);
-    console.log("bfkWtArt", bfkWtArt);
-    console.log("bfkWtRep", bfkWtRep);
-
-    try {
-        await dbQueries.createArticles(afkott);
-        await dbQueries.createArticles(afkgg);
-        await dbQueries.createArticles(bfkGd);
-        await dbQueries.createArticles(bfkWtArt);
-        await dbQueries.createArticles(bfkWtRep);
-    } catch (error) {
-        console.error(error);
-    }
-  
-    
-    await browser.close();
-    console.log("Cron job finished");
+    const articles: InsertArticle[] = [];
+    Promise.allSettled([
+        afkScraper.scrapeArticlesOttenschlag(browser, 2).then((a) => {
+            articles.push(...a);
+        }).catch((err) => {
+            console.error('Error scraping Ottenschlag:', err);  
+        }),
+        afkScraper.scrapeArticlesGrossGerungs(browser, 1).then((a) => {
+            articles.push(...a);
+        }) .catch((err) => {
+            console.error('Error scraping Gross Gerungs:', err);
+        }),
+        bfkScraper.scrapeArticlesGmuend(browser, 1).then((a) => {
+            articles.push(...a);
+        }).catch((err) => {
+            console.error('Error scraping Gmuend:', err)
+        }),
+        bfkScraper.scrapeArticlesWeidhofen(browser, 3).then((a) => {
+            articles.push(...a);
+        }).catch((err) => {
+            console.error('Error scraping Weidhofen:', err)
+        }),
+        bfkScraper.scrapeDeploymentReportsWeidhofen(browser, 3).then((a) => {
+            articles.push(...a);
+        }).catch((err) => {
+            console.error('Error scraping deployment reports Weidhofen:', err)
+        }),
+    ]).then(async () => {
+        try {
+            await dbQueries.createArticles(articles);
+        }
+        catch (error) {
+            console.error('Error saving articles:', error);
+        }
+        await browser.close();
+        console.log("Cron job finished");
+    });
 });
