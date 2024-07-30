@@ -1,8 +1,6 @@
 import * as puppeteer from "puppeteer";
 import { InsertArticle } from "../../db/schema";
 import * as dbQueries from "../../db/queries";
-import { db } from "../../db";
-import e from "express";
 
 async function scrapeArticlesUrlsGmuend(browser: puppeteer.Browser): Promise<string[]> {
     const url: string = 'https://www.bfkdo-gmuend.at';
@@ -137,44 +135,25 @@ export async function scrapeDeploymentReportsWeidhofen(browser: puppeteer.Browse
 
     await page.close();
     return await removePersistedArticles(articles, districtId);
+
 }
 
-export async function scrapeArticlesKrems(browser: puppeteer.Browser, districtId: number) {
-    const url: string = 'https://www.bfk-krems.at';
+export async function scrapeArticlesZwettl(browser: puppeteer.Browser, districtId: number) {
+    const url: string = 'https://www.bfk.zwettl.at/';
     console.log(`Scraping from ${url}`);
-    try {
-        const page = await browser.newPage();
-        await page.waitForSelector('frame[name="Display"]', { timeout: 30000 });
+    const page = await browser.newPage();
+    await page.goto(url);
 
-        // Get the URL of the "Display" frame
-        const frameHandle = await page.$('frame[name="Display"]');
-        if (!frameHandle) {
-            throw new Error("Frame 'Display' not found");
-        }
-        
-        const frame = await frameHandle.contentFrame();
-        if (!frame) {
-            throw new Error("Content frame 'Display' not found");
-        }
+    const html = await page.$('html body section.container-lg div.row div.col-12 div.row div.col-12.col-md-9.p-1.p-md-3');
+    console.log(html);
 
-        console.log('Successfully accessed the Display frame.');
-
-        // Wait for JavaScript content to load in the "Display" frame
-        await frame.waitForSelector('.Liste', { timeout: 30000 }); // Adjust the selector as needed
-
-        console.log('JavaScript content loaded in the Display frame.');
- 
-
-    } catch(error) {
-        console.error(error);
-    }
-    await browser.close();
-}   
+}
 
 async function removePersistedArticles(articles: InsertArticle[], id: number): Promise<InsertArticle[]> {
     const articleExistencePromises = articles.map(article =>
         dbQueries.articleExists(article.title, id).then(exists => ({ article, exists }))
     );
+
     const articlesAndExistence = await Promise.all(articleExistencePromises);
     const newArticles = articlesAndExistence
         .filter(({ exists }) => !exists)
