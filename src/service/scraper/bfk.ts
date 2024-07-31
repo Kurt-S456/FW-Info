@@ -1,8 +1,6 @@
 import * as puppeteer from "puppeteer";
 import { InsertArticle } from "../../db/schema";
 import * as dbQueries from "../../db/queries";
-import { db } from "../../db";
-import e from "express";
 
 async function scrapeArticlesUrlsGmuend(browser: puppeteer.Browser): Promise<string[]> {
     const url: string = 'https://www.bfkdo-gmuend.at';
@@ -137,44 +135,41 @@ export async function scrapeDeploymentReportsWeidhofen(browser: puppeteer.Browse
 
     await page.close();
     return await removePersistedArticles(articles, districtId);
+
 }
 
-export async function scrapeArticlesKrems(browser: puppeteer.Browser, districtId: number) {
-    const url: string = 'https://www.bfk-krems.at';
+export async function scrapeArticlesZwettl(browser: puppeteer.Browser, districtId: number) {
+    const url: string = 'https://www.bfk.zwettl.at/bfk/nachrichten';
     console.log(`Scraping from ${url}`);
-    try {
-        const page = await browser.newPage();
-        await page.waitForSelector('frame[name="Display"]', { timeout: 30000 });
+    const page = await browser.newPage();
+    await page.goto(url);
+    const articles = await page.evaluate((districtId, baseUrl) => {
+        const articleElements = document.querySelectorAll('.card');
+        return Array.from(articleElements).map(article => {
+            const titleElement = article.querySelector('.card-title');
+            const summaryElement = article.querySelector('p:nth-child(3) > small:nth-child(1)');
+            const imageUrlElement = article.querySelector('.img-fluid');
+            const urlElement = article.querySelector('a.text-decoration-none.h-100');
 
-        // Get the URL of the "Display" frame
-        const frameHandle = await page.$('frame[name="Display"]');
-        if (!frameHandle) {
-            throw new Error("Frame 'Display' not found");
-        }
-        
-        const frame = await frameHandle.contentFrame();
-        if (!frame) {
-            throw new Error("Content frame 'Display' not found");
-        }
+            return {
+                districtId: districtId,
+                title: titleElement?.textContent?.trim() || '',
+                summary: summaryElement?.textContent?.trim() || '',
+                imageUrl: baseUrl + imageUrlElement?.getAttribute('src') || '',
+                url: urlElement?.getAttribute('href') || '',
+            } as InsertArticle;
+        });
 
-        console.log('Successfully accessed the Display frame.');
-
-        // Wait for JavaScript content to load in the "Display" frame
-        await frame.waitForSelector('.Liste', { timeout: 30000 }); // Adjust the selector as needed
-
-        console.log('JavaScript content loaded in the Display frame.');
- 
-
-    } catch(error) {
-        console.error(error);
-    }
-    await browser.close();
-}   
+    }, districtId, url.substring(0, url.indexOf('/bfk')));
+    await page.close();
+    return await removePersistedArticles(articles, districtId);    
+}
 
 async function removePersistedArticles(articles: InsertArticle[], id: number): Promise<InsertArticle[]> {
     const articleExistencePromises = articles.map(article =>
         dbQueries.articleExists(article.title, id).then(exists => ({ article, exists }))
     );
+
     const articlesAndExistence = await Promise.all(articleExistencePromises);
     const newArticles = articlesAndExistence
         .filter(({ exists }) => !exists)
