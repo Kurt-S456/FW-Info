@@ -139,14 +139,30 @@ export async function scrapeDeploymentReportsWeidhofen(browser: puppeteer.Browse
 }
 
 export async function scrapeArticlesZwettl(browser: puppeteer.Browser, districtId: number) {
-    const url: string = 'https://www.bfk.zwettl.at/';
+    const url: string = 'https://www.bfk.zwettl.at/bfk/nachrichten';
     console.log(`Scraping from ${url}`);
     const page = await browser.newPage();
     await page.goto(url);
+    const articles = await page.evaluate((districtId, baseUrl) => {
+        const articleElements = document.querySelectorAll('.card');
+        return Array.from(articleElements).map(article => {
+            const titleElement = article.querySelector('.card-title');
+            const summaryElement = article.querySelector('p:nth-child(3) > small:nth-child(1)');
+            const imageUrlElement = article.querySelector('.img-fluid');
+            const urlElement = article.querySelector('a.text-decoration-none.h-100');
 
-    const html = await page.$('html body section.container-lg div.row div.col-12 div.row div.col-12.col-md-9.p-1.p-md-3');
-    console.log(html);
+            return {
+                districtId: districtId,
+                title: titleElement?.textContent?.trim() || '',
+                summary: summaryElement?.textContent?.trim() || '',
+                imageUrl: baseUrl + imageUrlElement?.getAttribute('src') || '',
+                url: urlElement?.getAttribute('href') || '',
+            } as InsertArticle;
+        });
 
+    }, districtId, url.substring(0, url.indexOf('/bfk')));
+    await page.close();
+    return await removePersistedArticles(articles, districtId);    
 }
 
 async function removePersistedArticles(articles: InsertArticle[], id: number): Promise<InsertArticle[]> {

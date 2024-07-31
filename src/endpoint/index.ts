@@ -53,6 +53,11 @@ cron.schedule('* * * * *', async () => {
         }).catch((err) => {
             console.error('Error scraping deployment reports Weidhofen:', err)
         }),
+        bfkScraper.scrapeArticlesZwettl(browser, 2).then((a) => {
+            articles.push(...a);
+        }).catch((err) => {
+            console.error('Error scraping Zwettl:', err)
+        }),
     ]).then(async () => {
         try {
             await dbQueries.createArticles(articles);
