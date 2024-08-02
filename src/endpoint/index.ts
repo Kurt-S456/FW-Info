@@ -2,6 +2,7 @@ import express, { Express } from "express";
 import * as scraper from '../service/scraper/index';
 import * as bfkScraper from '../service/scraper/bfk';
 import * as dbQueries from '../db/queries';
+import { ArticleSearchDTO } from "../dto/article";
 import * as cron from 'node-cron';
 import { InsertArticle } from "../db/schema";
 
@@ -21,10 +22,17 @@ app.get('/articles', async (req: express.Request, res: express.Response) => {
     console.log("GET /articles");
     const filters = req.query;
     if (Object.keys(filters).length > 0) {
-        res.send(await dbQueries.getArticles(parseInt(<string>filters?.page, 10), parseInt(<string>filters?.size, 10)));
+        res.send(await dbQueries.getArticles(
+            {
+                districtId: parseInt(<string>filters?.districtId),
+                title: <string>filters?.title,
+                tagId: parseInt(<string>filters?.tagId)
+            },
+            parseInt(<string>filters?.page, 10),
+            parseInt(<string>filters?.size, 10)));
         return;
     }
-    res.send(await dbQueries.getArticles());
+    res.send(await dbQueries.getArticles({}));
 });
 
 /*

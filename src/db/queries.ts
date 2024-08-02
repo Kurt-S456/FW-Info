@@ -1,15 +1,31 @@
 
 import { db } from './index';
-import {desc, eq, sql} from 'drizzle-orm';
+import {and, desc, eq, like, sql} from 'drizzle-orm';
 import { articleTable, InsertArticle, SelectArticle } from './schema';
+import {ArticleSearchDTO} from "../dto/article";
 
-export async function getArticles(page = 1, size = 10) : Promise<Array<SelectArticle>> {
+export async function getArticles(searchParams: ArticleSearchDTO,page: number = 1, size: number = 10) : Promise<Array<SelectArticle>> {
+    console.log(searchParams);
+    const conditions = [];
 
+    if (searchParams.title) {
+        conditions.push(like(articleTable.title, `%${searchParams.title}%`));
+    }
+    if (searchParams.districtId) {
+        conditions.push(eq(articleTable.districtId, searchParams.districtId));
+    }
 
- return await db.select()
-     .from(articleTable)
-     .limit(size).offset((page - 1) * size)
-     .orderBy(desc(articleTable.createdAt));
+    const query = db.select()
+        .from(articleTable)
+        .limit(size)
+        .offset((page - 1) * size)
+        .orderBy(desc(articleTable.createdAt));
+
+    if (conditions.length > 0) {
+        query.where(and(...conditions));
+    }
+
+    return query;
 }
 
 export async function createArticle(data: InsertArticle): Promise<void> {
