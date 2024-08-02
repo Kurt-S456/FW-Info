@@ -19,9 +19,15 @@ app.get('/', (req: express.Request, res: express.Response) => {
 
 app.get('/articles', async (req: express.Request, res: express.Response) => {
     console.log("GET /articles");
+    const filters = req.query;
+    if (Object.keys(filters).length > 0) {
+        res.send(await dbQueries.getArticles(parseInt(<string>filters?.page, 10), parseInt(<string>filters?.size, 10)));
+        return;
+    }
     res.send(await dbQueries.getArticles());
 });
 
+/*
 cron.schedule('* * * * *', async () => {
     console.log("Cron job started");
     const browser = await scraper.initBrowser();
@@ -57,4 +63,4 @@ cron.schedule('* * * * *', async () => {
         await browser.close();
         console.log("Cron job finished");
     });
-});
+});*/
