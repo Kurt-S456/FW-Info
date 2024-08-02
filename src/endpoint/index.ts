@@ -1,6 +1,5 @@
 import express, { Express } from "express";
 import * as scraper from '../service/scraper/index';
-import * as afkScraper from '../service/scraper/afk';
 import * as bfkScraper from '../service/scraper/bfk';
 import * as dbQueries from '../db/queries';
 import * as cron from 'node-cron';
@@ -28,32 +27,22 @@ cron.schedule('* * * * *', async () => {
     const browser = await scraper.initBrowser();
     const articles: InsertArticle[] = [];
     Promise.allSettled([
-        afkScraper.scrapeArticlesOttenschlag(browser, 2).then((a) => {
-            articles.push(...a);
-        }).catch((err) => {
-            console.error('Error scraping Ottenschlag:', err);  
-        }),
-        afkScraper.scrapeArticlesGrossGerungs(browser, 1).then((a) => {
-            articles.push(...a);
-        }) .catch((err) => {
-            console.error('Error scraping Gross Gerungs:', err);
-        }),
         bfkScraper.scrapeArticlesGmuend(browser, 1).then((a) => {
             articles.push(...a);
         }).catch((err) => {
             console.error('Error scraping Gmuend:', err)
         }),
-        bfkScraper.scrapeArticlesWeidhofen(browser, 3).then((a) => {
+        bfkScraper.scrapeArticlesWeidhofen(browser, 2).then((a) => {
             articles.push(...a);
         }).catch((err) => {
             console.error('Error scraping Weidhofen:', err)
         }),
-        bfkScraper.scrapeDeploymentReportsWeidhofen(browser, 3).then((a) => {
+        bfkScraper.scrapeDeploymentReportsWeidhofen(browser, 2).then((a) => {
             articles.push(...a);
         }).catch((err) => {
             console.error('Error scraping deployment reports Weidhofen:', err)
         }),
-        bfkScraper.scrapeArticlesZwettl(browser, 2).then((a) => {
+        bfkScraper.scrapeArticlesZwettl(browser, 3).then((a) => {
             articles.push(...a);
         }).catch((err) => {
             console.error('Error scraping Zwettl:', err)

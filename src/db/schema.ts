@@ -8,30 +8,14 @@ export const districtTable = sqliteTable("district", {
   url: text("url").notNull(),
 });
 
-export const sectionTable = sqliteTable("section", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
-  url: text("url").notNull(),
-  districtId: integer("district_id").notNull().references(() => districtTable.id),
-
-});
-
-export const departmentTable = sqliteTable("department", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
-  url: text("url").notNull(),
-  districtId: integer("district_id").notNull().references(() => sectionTable.id),
-});
-
 export const articleTable = sqliteTable("article", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
   summary: text("summary").notNull(),
   url: text("url"),
   imageUrl: text("image_url"),
-  departmentId: integer("department_id").references(() => departmentTable.id),
-  sectionId: integer("section_id").references(() => sectionTable.id),
-  districtId: integer("district_id").references(() => districtTable.id),
+  districtId: integer("district_id")
+      .references(() => districtTable.id),
   createdAt: text('created_at')
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
@@ -51,7 +35,3 @@ export const articleTagTable = sqliteTable("article_tag", {
 
 export type InsertArticle = typeof articleTable.$inferInsert;
 export type SelectArticle = typeof articleTable.$inferSelect;
-
-export type SelectDepartment = typeof departmentTable.$inferSelect;
-
-export type SelectDistrict = typeof districtTable.$inferSelect;

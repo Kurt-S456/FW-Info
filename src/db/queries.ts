@@ -11,12 +11,12 @@ export async function createArticle(data: InsertArticle): Promise<void> {
     await db.insert(articleTable).values(data);
 }
 
-export async function articleExists(title: string, id: number): Promise<boolean> {
+export async function articleExists(title: string, districtId: number): Promise<boolean> {
     const result = await db.select({ count: sql<number>`count(*)` })
                             .from(articleTable)
                             .where(
                                 eq(articleTable.title, title) 
-                                && (eq(articleTable.districtId, id || eq(articleTable.departmentId, id) || eq(articleTable.sectionId, id)))
+                                && eq(articleTable.districtId, districtId)
                             );
 
     return result[0].count > 0;
